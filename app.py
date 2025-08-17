@@ -7,15 +7,7 @@ assets = Environment(app)
 
 API_BASE = "https://tenders.guru/api"
 TRANSLATE_API = "https://ftapi.pythonanywhere.com/translate"   # ✅ new endpoint
-scss = Bundle(
-    'style.scss',  # input file in /static/
-    filters='libsass',  # or 'libsass'
-    output='style.css'  # compiled output
-)
 
-assets.register('scss_all', scss)
-# ✅ Build assets at startup
-scss.build()
 
 @app.route("/", methods=["GET"])
 def home():
