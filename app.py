@@ -40,6 +40,7 @@ def home():
                            query=query,
                            page=page)
 
+
 @app.route("/translate", methods=["POST"])
 def translate():
     data = request.get_json()
@@ -64,14 +65,12 @@ def translate():
         else:
             translated_list = result.get("destination-text", texts)
 
-        return jsonify({"translations": translated_list})
-
     except Exception as e:
         print("Translation error:", e)
-        return jsonify({"translations": texts})
-
+        translated_list = texts
 
     return jsonify({"translations": translated_list})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
