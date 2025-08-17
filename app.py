@@ -42,21 +42,34 @@ def home():
 
 @app.route("/translate", methods=["POST"])
 def translate():
-    texts = request.json.get("texts", [])   # list of strings
-    target_lang = request.json.get("target", "en")
-    headers = {"Content-Type": "application/json"}
+    data = request.get_json()
+    texts = data.get("texts", [])
+    target_lang = data.get("target", "en")
 
-    translated_list = []
-    for text in texts:
-        params = {"dl": target_lang, "text": text}
-        try:
-            r = requests.get(TRANSLATE_API, params=params, headers=headers, timeout=10)
-            r.raise_for_status()
-            dst = r.json().get("destination-text", text)
-            translated_list.append(dst)
-        except Exception as e:
-            print("Translation error:", e)
-            translated_list.append(text)
+    try:
+        # Send whole list at once
+        r = requests.post(
+            TRANSLATE_API,
+            json={"text": texts, "dl": target_lang},
+            headers={"Content-Type": "application/json"},
+            timeout=15
+        )
+        r.raise_for_status()
+
+        result = r.json()
+
+        # If API returns a single string (for one input)
+        if isinstance(result.get("destination-text"), str):
+            translated_list = [result["destination-text"]]
+        else:
+            translated_list = result.get("destination-text", texts)
+
+        return jsonify({"translations": translated_list})
+
+    except Exception as e:
+        print("Translation error:", e)
+        return jsonify({"translations": texts})
+
 
     return jsonify({"translations": translated_list})
 
