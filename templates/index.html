@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tenders Explorer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<!-- use CSS not SCSS directly -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Full page overlay */
+        #loading-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(10, 10, 10, 0.8);
+          display: none; /* hidden initially */
+          justify-content: center;
+          align-items: center;
+          z-index: 999999; /* cover everything */
+        }
+        #loading-overlay .loader-content {
+          text-align: center;
+          color: #fff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+    <h1 class="mb-4 text-center">🌍 Public Tenders Explorer</h1>
+
+    <!-- Search & Country Filter -->
+    <form method="get" class="row mb-4">
+        <div class="col-md-4">
+            <input type="text" name="q" class="form-control" placeholder="Search tenders..."
+                   value="{{ query }}">
+        </div>
+        <div class="col-md-3">
+            <select name="country" class="form-select">
+                <option value="es" {% if country=="es" %}selected{% endif %}>Spain</option>
+                <option value="pl" {% if country=="pl" %}selected{% endif %}>Poland</option>
+                <option value="ro" {% if country=="ro" %}selected{% endif %}>Romania</option>
+                <option value="lt" {% if country=="lt" %}selected{% endif %}>Lithuania</option>
+            </select>
+        </div>
+        <input type="hidden" name="page" value="1">
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Search</button>
+        </div>
+    </form>
+
+    <!-- Language Switcher -->
+    <div class="mb-4">
+        <label for="lang" class="form-label">🌐 Translate to:</label>
+        <select id="lang" class="form-select w-auto d-inline">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="pl">Polish</option>
+            <option value="ro">Romanian</option>
+            <option value="fr">French</option>
+        </select>
+        <button id="translate-btn" class="btn btn-success ms-2">Translate</button>
+    </div>
+
+    <!-- Tenders List -->
+    {% if tenders %}
+        <div class="list-group" id="tenders-list">
+            {% for t in tenders %}
+                <div class="list-group-item tender-item">
+                    <h5 class="title">{{ t.title }}</h5>
+                    <p><strong>Buyer:</strong> <span class="buyer">{{ t.buyer_name }}</span></p>
+                    <p><strong>Deadline:</strong> {{ t.deadline_date }}</p>
+                    <a href="{{ t.source_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">View Details</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-danger">⚠️ No tenders found or API error.</p>
+    {% endif %}
+
+    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-between mt-4">
+    {% if page > 1 %}
+        <a href="?country={{ country }}&q={{ query }}&page={{ page - 1 }}" class="btn btn-secondary">⬅️ Previous</a>
+    {% else %}
+        <span></span>
+    {% endif %}
+    {% if tenders|length == 10 %}
+        <a href="?country={{ country }}&q={{ query }}&page={{ page + 1 }}" class="btn btn-secondary">Next ➡️</a>
+    {% endif %}
+    </div>
+</div>
+
+<!-- Full-Screen Overlay Loader -->
+<div id="loading-overlay">
+  <div class="loader-content">
+    <!-- ✅ only ONE <svg>, keep your microchip definition here -->
+        <svg class="microchip" viewBox="0 0 128 128" width="128px" height="128px" role="img" aria-label="A square pops in emitting waves and lines, and sparks run through the lines">
+	<symbol id="dot-1">
+		<circle r="3" cx="3" cy="38" />
+	</symbol>
+	<symbol id="dot-2">
+		<circle r="3" cx="3" cy="54" />
+	</symbol>
+	<symbol id="dot-3">
+		<circle r="3" cx="3" cy="70" />
+	</symbol>
+	<symbol id="dot-4">
+		<circle r="3" cx="3" cy="3" />
+	</symbol>
+	<symbol id="dot-5">
+		<circle r="3" cx="20" cy="3" />
+	</symbol>
+	<symbol id="dot-6">
+		<circle r="3" cx="3" cy="30" />
+	</symbol>
+	<symbol id="dot-7">
+		<circle r="3" cx="37" cy="3" />
+	</symbol>
+	<symbol id="dot-8">
+		<circle r="3" cx="54" cy="3" />
+	</symbol>
+	<symbol id="dot-9">
+		<circle r="3" cx="71" cy="3" />
+	</symbol>
+	<symbol id="line-1">
+		<polyline points="12 54,12 46,3 46,3 38" stroke-dasharray="42 42" />
+	</symbol>
+	<symbol id="line-2">
+		<polyline points="29 54,3 54" stroke-dasharray="42 42" />
+	</symbol>
+	<symbol id="line-3">
+		<polyline points="12 54,12 62,3 62,3 70" stroke-dasharray="42 42" />
+	</symbol>
+	<symbol id="line-4">
+		<polyline points="28 20,28 12,20 12,20 3" stroke-dasharray="60 60" />
+	</symbol>
+	<symbol id="line-5">
+		<polyline points="37 29,37 20,3 20,3 3" stroke-dasharray="60 60" />
+	</symbol>
+	<symbol id="line-6">
+		<polyline points="15 20,15 30,3 30" stroke-dasharray="60 60" />
+	</symbol>
+	<symbol id="line-7">
+		<polyline points="54 12,37 12,37 3" stroke-dasharray="43 43" />
+	</symbol>
+	<symbol id="line-8">
+		<polyline points="54 29,54 3" stroke-dasharray="43 43" />
+	</symbol>
+	<symbol id="line-9">
+		<polyline points="54 12,71 12,71 3" stroke-dasharray="43 43" />
+	</symbol>
+	<symbol id="spark-1">
+		<polyline points="12 54,12 46,3 46,3 38" stroke-dasharray="15 69" />
+	</symbol>
+	<symbol id="spark-2">
+		<polyline points="29 54,3 54" stroke-dasharray="15 69" />
+	</symbol>
+	<symbol id="spark-3">
+		<polyline points="12 54,12 62,3 62,3 70" stroke-dasharray="15 69" />
+	</symbol>
+	<symbol id="spark-4">
+		<polyline points="28 20,28 12,20 12,20 3" stroke-dasharray="15 105" />
+	</symbol>
+	<symbol id="spark-5">
+		<polyline points="37 29,37 20,3 20,3 3" stroke-dasharray="15 105" />
+	</symbol>
+	<symbol id="spark-6">
+		<polyline points="15 20,15 30,3 30" stroke-dasharray="15 105" />
+	</symbol>
+	<symbol id="spark-7">
+		<polyline points="54 12,37 12,37 3" stroke-dasharray="15 71" />
+	</symbol>
+	<symbol id="spark-8">
+		<polyline points="54 29,54 3" stroke-dasharray="15 71" />
+	</symbol>
+	<symbol id="spark-9">
+		<polyline points="54 12,71 12,71 3" stroke-dasharray="15 71" />
+	</symbol>
+	<symbol id="wave">
+		<rect x="3" y="3" rx="2.5" ry="2.5" width="44" height="44" />
+	</symbol>
+	<g transform="translate(10,10)">
+		<g class="microchip__lines" stroke-linecap="round" stroke-linejoin="round">
+			<g>
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--1" href="#line-1" />
+					<use class="microchip__spark microchip__spark--1" href="#spark-1" />
+					<use class="microchip__line microchip__line--2" href="#line-2" />
+					<use class="microchip__spark microchip__spark--2" href="#spark-2" />
+					<use class="microchip__line microchip__line--3" href="#line-3" />
+					<use class="microchip__spark microchip__spark--3" href="#spark-3" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--1" href="#dot-1" />
+					<use class="microchip__dot microchip__dot--2" href="#dot-2" />
+					<use class="microchip__dot microchip__dot--3" href="#dot-3" />
+				</g>
+			</g>
+			<g>
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--4" href="#line-4" />
+					<use class="microchip__spark microchip__spark--4" href="#spark-4" />
+					<use class="microchip__line microchip__line--5" href="#line-5" />
+					<use class="microchip__spark microchip__spark--5" href="#spark-5" />
+					<use class="microchip__line microchip__line--6" href="#line-6" />
+					<use class="microchip__spark microchip__spark--6" href="#spark-6" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--4" href="#dot-4" />
+					<use class="microchip__dot microchip__dot--5" href="#dot-5" />
+					<use class="microchip__dot microchip__dot--6" href="#dot-6" />
+				</g>
+			</g>
+			<g>
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--7" href="#line-7" />
+					<use class="microchip__spark microchip__spark--7" href="#spark-7" />
+					<use class="microchip__line microchip__line--8" href="#line-8" />
+					<use class="microchip__spark microchip__spark--8" href="#spark-8" />
+					<use class="microchip__line microchip__line--9" href="#line-9" />
+					<use class="microchip__spark microchip__spark--9" href="#spark-9" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--7" href="#dot-7" />
+					<use class="microchip__dot microchip__dot--8" href="#dot-8" />
+					<use class="microchip__dot microchip__dot--9" href="#dot-9" />
+				</g>
+			</g>
+			<g transform="translate(108,0) scale(-1,1)">
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--4" href="#line-4" />
+					<use class="microchip__spark microchip__spark--4" href="#spark-4" />
+					<use class="microchip__line microchip__line--5" href="#line-5" />
+					<use class="microchip__spark microchip__spark--5" href="#spark-5" />
+					<use class="microchip__line microchip__line--6" href="#line-6" />
+					<use class="microchip__spark microchip__spark--6" href="#spark-6" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--4" href="#dot-4" />
+					<use class="microchip__dot microchip__dot--5" href="#dot-5" />
+					<use class="microchip__dot microchip__dot--6" href="#dot-6" />
+				</g>
+			</g>
+			<g transform="translate(108,0) scale(-1,1)">
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--1" href="#line-1" />
+					<use class="microchip__spark microchip__spark--1" href="#spark-1" />
+					<use class="microchip__line microchip__line--2" href="#line-2" />
+					<use class="microchip__spark microchip__spark--2" href="#spark-2" />
+					<use class="microchip__line microchip__line--3" href="#line-3" />
+					<use class="microchip__spark microchip__spark--3" href="#spark-3" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--1" href="#dot-1" />
+					<use class="microchip__dot microchip__dot--2" href="#dot-2" />
+					<use class="microchip__dot microchip__dot--3" href="#dot-3" />
+				</g>
+			</g>
+			<g transform="translate(108,108) scale(-1,-1)">
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--4" href="#line-4" />
+					<use class="microchip__spark microchip__spark--4" href="#spark-4" />
+					<use class="microchip__line microchip__line--5" href="#line-5" />
+					<use class="microchip__spark microchip__spark--5" href="#spark-5" />
+					<use class="microchip__line microchip__line--6" href="#line-6" />
+					<use class="microchip__spark microchip__spark--6" href="#spark-6" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--4" href="#dot-4" />
+					<use class="microchip__dot microchip__dot--5" href="#dot-5" />
+					<use class="microchip__dot microchip__dot--6" href="#dot-6" />
+				</g>
+			</g>
+			<g transform="translate(0,108) scale(1,-1)">
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--7" href="#line-7" />
+					<use class="microchip__spark microchip__spark--7" href="#spark-7" />
+					<use class="microchip__line microchip__line--8" href="#line-8" />
+					<use class="microchip__spark microchip__spark--8" href="#spark-8" />
+					<use class="microchip__line microchip__line--9" href="#line-9" />
+					<use class="microchip__spark microchip__spark--9" href="#spark-9" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--7" href="#dot-7" />
+					<use class="microchip__dot microchip__dot--8" href="#dot-8" />
+					<use class="microchip__dot microchip__dot--9" href="#dot-9" />
+				</g>
+			</g>
+			<g transform="translate(0,108) scale(1,-1)">
+				<g fill="none" stroke="currentcolor">
+					<use class="microchip__line microchip__line--4" href="#line-4" />
+					<use class="microchip__spark microchip__spark--4" href="#spark-4" />
+					<use class="microchip__line microchip__line--5" href="#line-5" />
+					<use class="microchip__spark microchip__spark--5" href="#spark-5" />
+					<use class="microchip__line microchip__line--6" href="#line-6" />
+					<use class="microchip__spark microchip__spark--6" href="#spark-6" />
+				</g>
+				<g fill="currentcolor">
+					<use class="microchip__dot microchip__dot--4" href="#dot-4" />
+					<use class="microchip__dot microchip__dot--5" href="#dot-5" />
+					<use class="microchip__dot microchip__dot--6" href="#dot-6" />
+				</g>
+			</g>
+		</g>
+		<g transform="translate(29,29)">
+			<g class="microchip__center">
+				<g fill="none" stroke="currentcolor" stroke-width="6">
+					<use class="microchip__wave microchip__wave--1" href="#wave" />
+					<use class="microchip__wave microchip__wave--2" href="#wave" />
+				</g>
+				<rect class="microchip__core" fill="currentcolor" rx="5" ry="5" width="50" height="50" />
+			</g>
+		</g>
+	</g>
+</svg>
+    <svg class="microchip" viewBox="0 0 128 128" width="128px" height="128px" role="img" aria-label="Loading...">
+        <!-- put your <symbol> and <g> code here (without nesting another <svg>) -->
+    </svg>
+    <p class="mt-3">Translating... please wait</p>
+  </div>
+</div>
+
+<script>
+$("#translate-btn").click(function() {
+    let targetLang = $("#lang").val();
+    let elems = $("h1, h5, p, label, button, option, strong");
+    let texts = elems.map(function(){ return $(this).text().trim(); }).get();
+
+    // Show overlay loader
+    $("#loading-overlay").fadeIn();
+
+    $.post("/translate", JSON.stringify({
+        texts: texts,
+        target: targetLang
+    }), function(data) {
+        let translations = data.translations;
+        elems.each(function(i) {
+            $(this).text(translations[i]);
+        });
+
+        // Hide overlay
+        $("#loading-overlay").fadeOut();
+    }, "json")
+    .fail(function() {
+        alert("⚠️ Translation failed. Please try again.");
+        $("#loading-overlay").fadeOut();
+    });
+});
+
+$(document).ajaxSend(function(e, xhr, options) {
+    xhr.setRequestHeader("Content-Type", "application/json");
+});
+</script>
+
+</body>
+</html>
