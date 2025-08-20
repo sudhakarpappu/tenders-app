@@ -41,6 +41,9 @@ def home():
                            page=page)
 
 
+from googletrans import Translator
+translator = Translator()
+
 @app.route("/translate", methods=["POST"])
 def translate():
     data = request.get_json()
@@ -48,23 +51,7 @@ def translate():
     target_lang = data.get("target", "en")
 
     try:
-        # Send whole list at once
-        r = requests.post(
-            TRANSLATE_API,
-            json={"text": texts, "dl": target_lang},
-            headers={"Content-Type": "application/json"},
-            timeout=15
-        )
-        r.raise_for_status()
-
-        result = r.json()
-
-        # If API returns a single string (for one input)
-        if isinstance(result.get("destination-text"), str):
-            translated_list = [result["destination-text"]]
-        else:
-            translated_list = result.get("destination-text", texts)
-
+        translated_list = [translator.translate(t, dest=target_lang).text for t in texts]
     except Exception as e:
         print("Translation error:", e)
         translated_list = texts
