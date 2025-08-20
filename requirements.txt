@@ -3,3 +3,4 @@ gunicorn
 flask-assets
 libsass
 requests
+googletrans
