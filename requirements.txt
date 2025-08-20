@@ -3,4 +3,4 @@ gunicorn
 flask-assets
 libsass
 requests
-googletrans
+googletrans==4.0.0-rc1
